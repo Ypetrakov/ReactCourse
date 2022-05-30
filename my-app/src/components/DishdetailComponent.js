@@ -5,7 +5,7 @@ import {
 } from 'reactstrap';
 import {Link} from 'react-router-dom';
 import {Control, LocalForm, Errors} from 'react-redux-form';
-
+import {Loading} from './LoadingComponent';
 
 const required = (val) => val && val.length;
 const maxLength = (len) => (val) => !(val) || (val.length <= len);
@@ -40,14 +40,14 @@ function RenderComments({comments, addComment, dishId}) {
                     day: '2-digit'
                 }).format(new Date(Date.parse(comment.date)))}</div>
             </div>
-    )
+        )
     })
 
     return (
         <div>
             <h4>Comments</h4>
             {comment}
-            <CommentForm  dishId={dishId} addComment={addComment}/>
+            <CommentForm dishId={dishId} addComment={addComment}/>
         </div>
 
     );
@@ -93,7 +93,7 @@ class CommentForm extends Component {
                                 <Label htmlFor="rating" md={2}>Rating</Label>
                                 <Col md={12}>
                                     <Control.select model=".rating" id="rating" name="rating"
-                                                      className="form-control">
+                                                    className="form-control">
                                         <option value="1">1</option>
                                         <option value="2">2</option>
                                         <option value="3">3</option>
@@ -150,41 +150,57 @@ class CommentForm extends Component {
 }
 
 const DishDetail = (props) => {
-    const dish = props.dish
+    if (props.isLoading) {
+        return (
+            <div className="container">
+                <div className="row">
+                    <Loading/>
+                </div>
+            </div>
+        );
+    } else if (props.errMess) {
+        return (
+            <div className="container">
+                <div className="row">
+                    <h4>{props.errMess}</h4>
+                </div>
+            </div>
+        );
+    } else if (props.dish != null) {
+        return (
+            <div className="container">
+                <div className="row">
+                    <Breadcrumb>
 
-    if (dish == null)
+                        <BreadcrumbItem><Link to="/menu">Menu</Link></BreadcrumbItem>
+                        <BreadcrumbItem active>{props.dish.name}</BreadcrumbItem>
+                    </Breadcrumb>
+                    <div className="col-12">
+                        <h3>{props.dish.name}</h3>
+                        <hr/>
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-12 col-md-5 m-1">
+                        <RenderDish dish={props.dish}/>
+                    </div>
+                    <div className="col-12 col-md-5 m-1">
+                        <RenderComments comments={props.comments}
+                                        addComment={props.addComment}
+                                        dishId={props.dish.id}
+                        />
+
+                    </div>
+
+                </div>
+            </div>
+        );
+    }
+    else {
         return (
             <div></div>
         );
-
-    return (
-        <div className="container">
-            <div className="row">
-                <Breadcrumb>
-
-                    <BreadcrumbItem><Link to="/menu">Menu</Link></BreadcrumbItem>
-                    <BreadcrumbItem active>{props.dish.name}</BreadcrumbItem>
-                </Breadcrumb>
-                <div className="col-12">
-                    <h3>{props.dish.name}</h3>
-                    <hr/>
-                </div>
-            </div>
-            <div className="row">
-                <div className="col-12 col-md-5 m-1">
-                    <RenderDish dish={props.dish}/>
-                </div>
-                <div className="col-12 col-md-5 m-1">
-                    <RenderComments comments={props.comments}
-                                    addComment={props.addComment}
-                                    dishId={props.dish.id}
-                    />
-
-                </div>
-
-            </div>
-        </div>
-    );
+    }
 }
 
 
